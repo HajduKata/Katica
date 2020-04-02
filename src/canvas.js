@@ -1,5 +1,6 @@
 import Rectangle from "./Rectangle.js";
 import Circle from "./Circle.js";
+import Katica from "./Katica.js";
 
 let c = document.getElementById("myCanvas");
 let ctx = c.getContext("2d");
@@ -36,17 +37,11 @@ function drawItems() {
 }
 
 // Ladybug initialization
-var katicaImg = document.getElementById("katicaImg");
-katicaImg.src = '../resources/pictures/katica.png';
-katicaImg.onload = drawKatica;
-var katicaX = 10;
-var katicaY = 10;
-var katicaWidth = 40;
-var katicaHeight = 50;
-var katicaRotation = 90;
+let katica = new Katica();
+katica.katicaImg.onload = drawKatica;
 window.addEventListener('keydown', moveKatica);
 
-var requestAnimationFrame = window.requestAnimationFrame ||
+let requestAnimationFrame = window.requestAnimationFrame ||
     window.webkitRequestAnimationFrame;
 
 initItems();
@@ -65,10 +60,10 @@ function animate() {
 // Draw ladybug function
 function drawKatica() {
     ctx.save();
-    ctx.translate(katicaX + katicaWidth / 2, katicaY + katicaHeight / 2);
-    ctx.rotate((katicaRotation - 90) * Math.PI / 180.0);
-    ctx.translate(-katicaX - katicaWidth / 2, -katicaY - katicaHeight / 2);
-    ctx.drawImage(katicaImg, katicaX, katicaY, katicaWidth, katicaHeight);
+    ctx.translate(katica.x + katica.width / 2, katica.y + katica.height / 2);
+    ctx.rotate((katica.rotation - 90) * Math.PI / 180.0);
+    ctx.translate(-katica.x - katica.width / 2, -katica.y - katica.height / 2);
+    ctx.drawImage(katica.katicaImg, katica.x, katica.y, katica.width, katica.height);
     ctx.restore();
 }
 
@@ -76,27 +71,27 @@ function drawKatica() {
 function moveKatica(event) {
     let key = event.key;
     // Up
-    if ((key === 'ArrowUp' || key === 'w' || key === 'W') && katicaY > 0) {
-        katicaX -= 5 * Math.cos(katicaRotation * Math.PI / 180);
-        katicaY -= 5 * Math.sin(katicaRotation * Math.PI / 180);
+    if ((key === 'ArrowUp' || key === 'w' || key === 'W') && katica.y > 0) {
+        katica.x -= 5 * Math.cos(katica.rotation * Math.PI / 180);
+        katica.y -= 5 * Math.sin(katica.rotation * Math.PI / 180);
         if (collision()) {
-            katicaX += 15 * Math.cos(katicaRotation * Math.PI / 180);
-            katicaY += 15 * Math.sin(katicaRotation * Math.PI / 180);
+            katica.x += 15 * Math.cos(katica.rotation * Math.PI / 180);
+            katica.y += 15 * Math.sin(katica.rotation * Math.PI / 180);
         }
     }// Down
-    else if ((key === 'ArrowDown' || key === 's' || key === 'S') && katicaY < c.height - katicaHeight) {
-        katicaX += 5 * Math.cos(katicaRotation * Math.PI / 180);
-        katicaY += 5 * Math.sin(katicaRotation * Math.PI / 180);
+    else if ((key === 'ArrowDown' || key === 's' || key === 'S') && katica.y < c.height - katica.height) {
+        katica.x += 5 * Math.cos(katica.rotation * Math.PI / 180);
+        katica.y += 5 * Math.sin(katica.rotation * Math.PI / 180);
         if (collision()) {
-            katicaX -= 15 * Math.cos(katicaRotation * Math.PI / 180);
-            katicaY -= 15 * Math.sin(katicaRotation * Math.PI / 180);
+            katica.x -= 15 * Math.cos(katica.rotation * Math.PI / 180);
+            katica.y -= 15 * Math.sin(katica.rotation * Math.PI / 180);
         }
     }// Left
     else if (key === 'ArrowLeft' || key === 'a' || key === 'A') {
-        katicaRotation -= 15;
+        katica.rotation -= 15;
     }// Right
     else if (key === 'ArrowRight' || key === 'd' || key === 'D') {
-        katicaRotation += 15;
+        katica.rotation += 15;
     }
 }
 
@@ -107,10 +102,11 @@ function collision() {
         // Rectangle
         if (0 <= i && i < 3) {
             // Get ladybug vertexes
-            katicaVertexes[0] = {x: katicaX, y: katicaY};
-            katicaVertexes[1] = {x: katicaX + katicaWidth, y: katicaY};
-            katicaVertexes[2] = {x: katicaX + katicaWidth, y: katicaY + katicaHeight};
-            katicaVertexes[3] = {x: katicaX, y: katicaY + katicaHeight};
+            let katicaVertexes = [];
+            katicaVertexes[0] = {x: katica.x, y: katica.y};
+            katicaVertexes[1] = {x: katica.x + katica.width, y: katica.y};
+            katicaVertexes[2] = {x: katica.x + katica.width, y: katica.y + katica.height};
+            katicaVertexes[3] = {x: katica.x, y: katica.y + katica.height};
             // Get rectangle vertexes
             let rectangleVertexes = [];
             rectangleVertexes[0] = {x: items[i].x, y: items[i].y};
@@ -125,22 +121,22 @@ function collision() {
         } // Circle
         else {
             var cx, cy;
-            var angleOfRad = degToRad(-katicaRotation);
-            var rectCenterX = katicaX + katicaWidth / 2;
-            var rectCenterY = katicaY + katicaHeight / 2;
+            var angleOfRad = degToRad(-katica.rotation);
+            var rectCenterX = katica.x + katica.width / 2;
+            var rectCenterY = katica.y + katica.height / 2;
             var rotateCircleX = Math.cos(angleOfRad) * (items[i].x - rectCenterX) - Math.sin(angleOfRad) * (items[i].y - rectCenterY) + rectCenterX;
             var rotateCircleY = Math.sin(angleOfRad) * (items[i].x - rectCenterX) + Math.cos(angleOfRad) * (items[i].y - rectCenterY) + rectCenterY;
-            if (rotateCircleX < katicaX) {
-                cx = katicaX;
-            } else if (rotateCircleX > katicaX + katicaWidth) {
-                cx = katicaX + katicaWidth;
+            if (rotateCircleX < katica.x) {
+                cx = katica.x;
+            } else if (rotateCircleX > katica.x + katica.width) {
+                cx = katica.x + katica.width;
             } else {
                 cx = rotateCircleX;
             }
-            if (rotateCircleY < katicaY) {
-                cy = katicaY;
-            } else if (rotateCircleY > katicaY + katicaHeight) {
-                cy = katicaY + katicaHeight;
+            if (rotateCircleY < katica.y) {
+                cy = katica.y;
+            } else if (rotateCircleY > katica.y + katica.height) {
+                cy = katica.y + katica.height;
             } else {
                 cy = rotateCircleY;
             }
