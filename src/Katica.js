@@ -5,6 +5,7 @@ export default class Katica {
     height;
     rotation;
     katicaImg;
+    isResentful;
 
     constructor() {
         this.katicaImg = document.getElementById("katicaImg");
@@ -14,6 +15,7 @@ export default class Katica {
         this.width = 40;
         this.height = 50;
         this.rotation = 90;
+        this.isResentful = false;
     }
 
     get x() {
@@ -32,4 +34,11 @@ export default class Katica {
         return this.rotation;
     }
 
+    updateImage() {
+        if(this.isResentful) {
+            this.katicaImg.src = '../resources/pictures/katicaResentful.png';
+        } else {
+            this.katicaImg.src = '../resources/pictures/katica.png';
+        }
+    }
 }

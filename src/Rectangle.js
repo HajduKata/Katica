@@ -4,12 +4,11 @@ export default class Rectangle {
     width;
     height;
 
-    constructor(color) {
+    constructor() {
         let colors = ["Tomato", "SandyBrown", "Orange", "Gold", "YellowGreen", "SeaGreen", "Turquoise", "Teal", "SkyBlue", "SteelBlue", "SlateBlue", "Plum",];
         // Randomize colors
         let randomColor = Math.floor(Math.random() * 12);
         this.color = colors[randomColor];
-        this.color = color;
         // Randomize positions
         this.x = Math.floor(Math.random() * 880) + 50;
         this.y = Math.floor(Math.random() * 480) + 50;

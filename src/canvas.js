@@ -2,15 +2,15 @@ import Rectangle from "./Rectangle.js";
 import Circle from "./Circle.js";
 import Katica from "./Katica.js";
 
-let c = document.getElementById("myCanvas");
-let ctx = c.getContext("2d");
+let canvas = document.getElementById("myCanvas");
+let ctx = canvas.getContext("2d");
 let playing = true;
 
 // Initialize objects
 let items = [];
 
 function initItems() {
-    let index = 0;
+    let index;
     for (index = 0; index < 3; index++) {
         items[index] = new Rectangle();
     }
@@ -40,9 +40,9 @@ function drawItems() {
 let katica = new Katica();
 katica.katicaImg.onload = drawKatica;
 window.addEventListener('keydown', moveKatica);
+canvas.addEventListener('click', e => waitForClickOnKatica(e));
 
-let requestAnimationFrame = window.requestAnimationFrame ||
-    window.webkitRequestAnimationFrame;
+let requestAnimationFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame;
 
 initItems();
 animate();
@@ -51,9 +51,20 @@ animate();
 function animate() {
     if (playing) {
         requestAnimationFrame(animate);
-        ctx.clearRect(0, 0, c.width, c.height);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         drawItems();
         drawKatica();
+    }
+}
+
+function waitForClickOnKatica(e) {
+    if (katica.isResentful) {
+        if (e.clientX - 9 > katica.x && e.clientX - 9 < katica.x + katica.width &&
+            e.clientY - 26 > katica.y && e.clientY - 26 < katica.y + katica.height) {
+            katica.isResentful = false;
+            katica.updateImage();
+            window.addEventListener('keydown', moveKatica);
+        }
     }
 }
 
@@ -71,20 +82,22 @@ function drawKatica() {
 function moveKatica(event) {
     let key = event.key;
     // Up
-    if ((key === 'ArrowUp' || key === 'w' || key === 'W') && katica.y > 0) {
+    if ((key === 'ArrowUp' || key === 'w' || key === 'W')) {
         katica.x -= 5 * Math.cos(katica.rotation * Math.PI / 180);
         katica.y -= 5 * Math.sin(katica.rotation * Math.PI / 180);
-        if (collision()) {
+        if (collision() || hitEdgeOfCanvas()) {
             katica.x += 15 * Math.cos(katica.rotation * Math.PI / 180);
             katica.y += 15 * Math.sin(katica.rotation * Math.PI / 180);
+            katicaCollided();
         }
     }// Down
-    else if ((key === 'ArrowDown' || key === 's' || key === 'S') && katica.y < c.height - katica.height) {
+    else if ((key === 'ArrowDown' || key === 's' || key === 'S') && katica.y < canvas.height - katica.height) {
         katica.x += 5 * Math.cos(katica.rotation * Math.PI / 180);
         katica.y += 5 * Math.sin(katica.rotation * Math.PI / 180);
-        if (collision()) {
+        if (collision() || hitEdgeOfCanvas()) {
             katica.x -= 15 * Math.cos(katica.rotation * Math.PI / 180);
             katica.y -= 15 * Math.sin(katica.rotation * Math.PI / 180);
+            katicaCollided();
         }
     }// Left
     else if (key === 'ArrowLeft' || key === 'a' || key === 'A') {
@@ -93,6 +106,17 @@ function moveKatica(event) {
     else if (key === 'ArrowRight' || key === 'd' || key === 'D') {
         katica.rotation += 15;
     }
+}
+
+function katicaCollided() {
+    window.removeEventListener('keydown', moveKatica);
+    katica.isResentful = true;
+    katica.updateImage();
+    katica.rotation += 180;
+}
+
+function hitEdgeOfCanvas() {
+    return katica.x <= 0 || katica.y <= 0 || katica.x >= canvas.width - katica.width || katica.y >= canvas.height - katica.height;
 }
 
 // Checks if there's collision between the ladybug and the objects
@@ -212,11 +236,9 @@ function doPolygonsIntersect(a, b) {
             // If there is no overlap between the projects, the edge we are looking at separates the two
             // polygons, and we know there is no overlap
             if (maxA < minB || maxB < minA) {
-                console.log("polygons don't intersect!");
                 return false;
             }
         }
     }
-    console.log("polygons intersect!");
     return true;
 }
