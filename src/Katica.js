@@ -4,12 +4,12 @@ export default class Katica {
     width;
     height;
     rotation;
-    katicaImg;
+    image;
     isResentful;
 
     constructor() {
-        this.katicaImg = document.getElementById("katicaImg");
-        this.katicaImg.src = '../resources/pictures/katica.png';
+        this.image = document.getElementById("katicaImg");
+        this.image.src = '../resources/pictures/katica.png';
         this.x = 10;
         this.y = 10;
         this.width = 40;
@@ -36,9 +36,9 @@ export default class Katica {
 
     updateImage() {
         if(this.isResentful) {
-            this.katicaImg.src = '../resources/pictures/katicaResentful.png';
+            this.image.src = '../resources/pictures/katicaResentful.png';
         } else {
-            this.katicaImg.src = '../resources/pictures/katica.png';
+            this.image.src = '../resources/pictures/katica.png';
         }
     }
 }

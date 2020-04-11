@@ -1,13 +1,30 @@
 import Rectangle from "./Rectangle.js";
 import Circle from "./Circle.js";
 import Katica from "./Katica.js";
+import Flashlight from "./Flashlight.js";
 
 let canvas = document.getElementById("myCanvas");
 let ctx = canvas.getContext("2d");
 let playing = true;
 
-// Initialize objects
+// Initialize Objects
 let items = [];
+
+// Initialize Flashlight
+let flashlight = new Flashlight();
+flashlight.image.onload = drawFlashlight();
+
+// Initialize Katica
+let katica = new Katica();
+katica.image.onload = drawKatica();
+window.addEventListener('keydown', moveKatica);
+window.addEventListener('keydown', flashlightSwitching);
+canvas.addEventListener('click', e => waitForClickOnKatica(e));
+
+// Functions that run
+let requestAnimationFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame;
+initItems();
+animate();
 
 function initItems() {
     let index;
@@ -19,7 +36,17 @@ function initItems() {
     }
 }
 
-// Draw objects function
+// Animate function, redraws the ladybug and flashlight and draws the objects
+function animate() {
+    if (playing) {
+        requestAnimationFrame(animate);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawItems();
+        drawFlashlight();
+        drawKatica();
+    }
+}
+
 function drawItems() {
     for (let i = 0; i < 6; i++) {
         let item = items[i];
@@ -36,46 +63,50 @@ function drawItems() {
     }
 }
 
-// Ladybug initialization
-let katica = new Katica();
-katica.katicaImg.onload = drawKatica;
-window.addEventListener('keydown', moveKatica);
-canvas.addEventListener('click', e => waitForClickOnKatica(e));
-
-let requestAnimationFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame;
-
-initItems();
-animate();
-
-// Animate function, moves the ladybug and draws the objects
-function animate() {
-    if (playing) {
-        requestAnimationFrame(animate);
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        drawItems();
-        drawKatica();
-    }
+function drawFlashlight() {
+    flashlight.updateImage();
+    ctx.save();
+    ctx.translate(flashlight.x + flashlight.width / 2, flashlight.y + flashlight.height / 2);
+    ctx.rotate((flashlight.rotation - 90) * Math.PI / 180.0);
+    ctx.translate(-flashlight.x - flashlight.width / 2, -flashlight.y - flashlight.height / 2);
+    ctx.drawImage(flashlight.image, flashlight.x, flashlight.y, flashlight.width, flashlight.height);
+    ctx.restore();
 }
 
+function drawKatica() {
+    katica.updateImage();
+    ctx.save();
+    ctx.translate(katica.x + katica.width / 2, katica.y + katica.height / 2);
+    ctx.rotate((katica.rotation - 90) * Math.PI / 180.0);
+    ctx.translate(-katica.x - katica.width / 2, -katica.y - katica.height / 2);
+    ctx.drawImage(katica.image, katica.x, katica.y, katica.width, katica.height);
+    ctx.restore();
+}
+
+// Event operator for clicking (on katica)
 function waitForClickOnKatica(e) {
     if (katica.isResentful) {
         if (e.clientX - 9 > katica.x && e.clientX - 9 < katica.x + katica.width &&
             e.clientY - 26 > katica.y && e.clientY - 26 < katica.y + katica.height) {
             katica.isResentful = false;
-            katica.updateImage();
             window.addEventListener('keydown', moveKatica);
         }
     }
 }
 
-// Draw ladybug function
-function drawKatica() {
-    ctx.save();
-    ctx.translate(katica.x + katica.width / 2, katica.y + katica.height / 2);
-    ctx.rotate((katica.rotation - 90) * Math.PI / 180.0);
-    ctx.translate(-katica.x - katica.width / 2, -katica.y - katica.height / 2);
-    ctx.drawImage(katica.katicaImg, katica.x, katica.y, katica.width, katica.height);
-    ctx.restore();
+// Interacting with the flashlight
+function flashlightSwitching(event) {
+    let key = event.key;
+    // Switching the flashlight on or off by pressing 'F'
+    if(key === 'f' || key === 'F') {
+        flashlight.isSwitchedOn = !flashlight.isSwitchedOn;
+    } // Rotating the flashlight counterclockwise
+    else if(key === 'q' || key === 'Q') {
+        flashlight.rotation -= 15;
+    } // Rotating the flashlight clockwise
+    else if(key === 'e' || key === 'E') {
+        flashlight.rotation += 15;
+    }
 }
 
 // Moving the ladybug via keypressed event
@@ -111,7 +142,6 @@ function moveKatica(event) {
 function katicaCollided() {
     window.removeEventListener('keydown', moveKatica);
     katica.isResentful = true;
-    katica.updateImage();
     katica.rotation += 180;
 }
 
@@ -241,4 +271,5 @@ function doPolygonsIntersect(a, b) {
         }
     }
     return true;
+
 }
