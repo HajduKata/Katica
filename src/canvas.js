@@ -12,13 +12,13 @@ let items = [];
 
 // Initialize Flashlight
 let flashlight = new Flashlight();
-flashlight.image.onload = drawFlashlight();
+flashlight.mouseListenerOnFlashlight();
+window.addEventListener('keydown', flashlightSwitching);
 
 // Initialize Katica
 let katica = new Katica();
-katica.image.onload = drawKatica();
+katica.image.onload = drawKatica(katica);
 window.addEventListener('keydown', moveKatica);
-window.addEventListener('keydown', flashlightSwitching);
 canvas.addEventListener('click', e => waitForClickOnKatica(e));
 
 // Functions that run
@@ -42,7 +42,6 @@ function animate() {
         requestAnimationFrame(animate);
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         drawItems();
-        drawFlashlight();
         drawKatica();
     }
 }
@@ -63,16 +62,7 @@ function drawItems() {
     }
 }
 
-function drawFlashlight() {
-    flashlight.updateImage();
-    ctx.save();
-    ctx.translate(flashlight.x + flashlight.width / 2, flashlight.y + flashlight.height / 2);
-    ctx.rotate((flashlight.rotation - 90) * Math.PI / 180.0);
-    ctx.translate(-flashlight.x - flashlight.width / 2, -flashlight.y - flashlight.height / 2);
-    ctx.drawImage(flashlight.image, flashlight.x, flashlight.y, flashlight.width, flashlight.height);
-    ctx.restore();
-}
-
+// Used both by katica and flashlight
 function drawKatica() {
     katica.updateImage();
     ctx.save();
@@ -86,8 +76,8 @@ function drawKatica() {
 // Event operator for clicking (on katica)
 function waitForClickOnKatica(e) {
     if (katica.isResentful) {
-        if (e.clientX - 9 > katica.x && e.clientX - 9 < katica.x + katica.width &&
-            e.clientY - 26 > katica.y && e.clientY - 26 < katica.y + katica.height) {
+        if (e.offsetX > katica.x && e.offsetX < katica.x + katica.width &&
+            e.offsetY > katica.y && e.offsetY < katica.y + katica.height) {
             katica.isResentful = false;
             window.addEventListener('keydown', moveKatica);
         }
@@ -100,12 +90,15 @@ function flashlightSwitching(event) {
     // Switching the flashlight on or off by pressing 'F'
     if(key === 'f' || key === 'F') {
         flashlight.isSwitchedOn = !flashlight.isSwitchedOn;
+        flashlight.updateImage();
     } // Rotating the flashlight counterclockwise
     else if(key === 'q' || key === 'Q') {
         flashlight.rotation -= 15;
+        flashlight.updateImage();
     } // Rotating the flashlight clockwise
     else if(key === 'e' || key === 'E') {
         flashlight.rotation += 15;
+        flashlight.updateImage();
     }
 }
 
